@@ -1,0 +1,12 @@
+[Unit]
+Description=Stroommeter
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python /home/pi/stroommeter/stroommeter.py
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target

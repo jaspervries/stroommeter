@@ -1,0 +1,14 @@
+<?php
+
+$db['server'] = 'localhost';
+$db['username'] = 'root';
+$db['password'] = '';
+$db['database'] = 'energy';
+$db['prefix'] = 'eng_';
+
+//connect met database, dit gaat mis bij uitvoering van setup/install.php, maar wordt daar ondervangen
+$db['link'] = mysqli_connect($db['server'], $db['username'], $db['password'], $db['database']);
+//stel karakterset in voor mysqli_real_escape_string
+mysqli_set_charset($db['link'], 'utf8');
+
+?>

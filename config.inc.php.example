@@ -1,0 +1,51 @@
+<?php
+
+//counters
+//if you want to use custom chart colours, then you need to set a colour for all counters, otherwise default colours will be used
+$counters = array(
+    array(
+        'name' => 'Zonnepanelen',
+        'key' => 'MfbFdky9UtrwrYC2BCLZhK5Q',
+        'counter' => 1,
+        'unit' => 'kWh',
+        'color' => '#00E396'
+    ),
+    array(
+        'name' => 'Warmtepomp',
+        'key' => 'MfbFdky9UtrwrYC2BCLZhK5Q',
+        'counter' => 2,
+        'unit' => 'kWh',
+        'color' => '#FEB019'
+    ),
+    array(
+        'name' => 'Auto',
+        'key' => 'MfbFdky9UtrwrYC2BCLZhK5Q',
+        'counter' => 3,
+        'unit' => 'kWh',
+        'color' => '#008FFB'
+    ),
+    array(
+        'name' => 'Geleverd',
+        'key' => 'MfbFdky9UtrwrYC2BCLZhK5Q',
+        'counter' => 4,
+        'imp' => 1,
+        'unit' => 'kWh',
+        'color' => '#FF4560'
+    ),
+    array(
+        'name' => 'Teruggeleverd',
+        'key' => 'MfbFdky9UtrwrYC2BCLZhK5Q',
+        'counter' => 5,
+        'imp' => 1,
+        'unit' => 'kWh',
+        'color' => '#775DD0'
+    )
+);
+
+//user accounts
+//passwords need to be encoded using encodepassword.php in a browser
+$users = array(
+    'defaultuser' => '$2y$10$a39r2zntqz0aoigzD8ccVu/6mayTA5p.CD6sG/ATJZnRrsgYB8lQm'
+);
+
+?>

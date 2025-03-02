@@ -1,0 +1,12 @@
+[Unit]
+Description=P1meter
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python /home/pi/stroommeter/p1meter.py
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target
