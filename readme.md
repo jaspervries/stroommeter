@@ -79,8 +79,13 @@ If you want to see the status of the service
 ## Server-side
 
 The s0 and/or p1 script on the Raspberry Pi calculates power consumption per five minutes and sends that data every fifth minute over HTTP to a remote PHP script, which in turn stores the data in a MySQL/MariaDB database. The advantage of a remote server is that the SD card of the Pi doesn't get killed so quickly by lots of writes. And that you can easily run it on a shared hosting environment to access your energy usage statistics from anywhere. But you could very well run a webserver on the Pi and post the data to localhost.
-Either way the script in api/index.php receives the posted data. This must be accessible on a webserver. Configure your database credentials in dbconnect.inc.php. The database tables can be set up with setup/install.php.
-Lastly, the counters must be configured in config.inc.php. Again, there are two counters, remove one if you only need one or add accordingly.
+Either way the script in api/index.php receives the posted data. This must be accessible on a webserver. 
+
+Configure your database credentials in dbconnect.inc.php. The database tables can be set up with setup/install.php.
+
+The counters must be configured in config.inc.php. Again, there are two counters, remove one if you only need one or add accordingly.
+
+The script calculatedaily.php must be set up to run as a cronjob once a day. It is recommended to run it shortly after midnight to have the daily aggregates available as soon as possible. The daily aggregates are used by some of the graphs in the GUI.
 
 ### Things to check
 
