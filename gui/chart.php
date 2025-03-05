@@ -140,11 +140,20 @@ foreach($counters as $i => $counter) {
             $qry = "SELECT DATE(`datetime`), SUM(`usage`) FROM `" . $db['prefix'] . "usage` 
             WHERE DATE(`datetime`) BETWEEN '" . $date . "' AND DATE_ADD('" . $date . "', INTERVAL " . count($categories) . " DAY) AND `counter` = " . $i . " 
             GROUP BY DATE(`datetime`)";
+            if (($use_dailytable == TRUE) && ($_GET['type'] == 2)) {
+                $qry = "SELECT `date`, `usage` FROM `" . $db['prefix'] . "daily` 
+                WHERE `date` BETWEEN '" . $date . "' AND DATE_ADD('" . $date . "', INTERVAL " . count($categories) . " DAY) AND `counter` = " . $i;
+            }
             break;
         case 3:
             $qry = "SELECT YEAR(`datetime`), MONTH(`datetime`), SUM(`usage`) FROM `" . $db['prefix'] . "usage` 
             WHERE DATE(`datetime`) BETWEEN '" . $date . "' AND DATE_ADD('" . $date . "', INTERVAL " . count($categories) . " MONTH) AND `counter` = " . $i . " 
             GROUP BY YEAR(`datetime`), MONTH(`datetime`)";
+            if ($use_dailytable == TRUE) {
+                $qry = "SELECT YEAR(`date`), MONTH(`date`), SUM(`usage`) FROM `" . $db['prefix'] . "daily` 
+                WHERE DATE(`date`) BETWEEN '" . $date . "' AND DATE_ADD('" . $date . "', INTERVAL " . count($categories) . " MONTH) AND `counter` = " . $i . " 
+                GROUP BY YEAR(`date`), MONTH(`date`)";
+            }
             break;
         case 4:
             $qry = "SELECT HOUR(`datetime`), ROUND(AVG(`usage`)*12, 3) FROM `" . $db['prefix'] . "usage` 
@@ -161,7 +170,11 @@ foreach($counters as $i => $counter) {
             break;
         case 6:
             $qry = "SELECT 'totaal', SUM(`usage`) FROM `" . $db['prefix'] . "usage`
-                WHERE DATE(`datetime`) BETWEEN '" . $date2 . "' AND '" . $date . "' AND `counter` = " . $i;
+            WHERE DATE(`datetime`) BETWEEN '" . $date2 . "' AND '" . $date . "' AND `counter` = " . $i;
+            if ($use_dailytable == TRUE) {
+                $qry = "SELECT 'totaal', SUM(`usage`) FROM `" . $db['prefix'] . "daily`
+                WHERE `date` BETWEEN '" . $date2 . "' AND '" . $date . "' AND `counter` = " . $i;
+            }
             break;
     }
     $res = mysqli_query($db['link'], $qry);

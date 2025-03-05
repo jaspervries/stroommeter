@@ -96,7 +96,7 @@ $qry[] = "CREATE TABLE `".$db['prefix']."hourly` (
 $qry[] = "CREATE TABLE `".$db['prefix']."daily` (
 	`date` DATE NOT NULL,
 	`counter` INT UNSIGNED NOT NULL,
-	`usage` FLOAT UNSIGNED NOT NULL DEFAULT 0,
+	`usage` DECIMAL(6,4) NOT NULL DEFAULT 0,
 	PRIMARY KEY (`date`, `counter`)
 	)
 	ENGINE=MyISAM";

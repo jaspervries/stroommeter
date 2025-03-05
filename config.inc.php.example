@@ -42,6 +42,9 @@ $counters = array(
     )
 );
 
+//use the table with daily aggregates for graphs (default), this is faster but requires a cronjob for calculatedaily.php
+$use_dailytable = TRUE;
+
 //user accounts
 //passwords need to be encoded using encodepassword.php in a browser
 $users = array(

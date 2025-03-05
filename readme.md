@@ -85,12 +85,13 @@ Configure your database credentials in dbconnect.inc.php. The database tables ca
 
 The counters must be configured in config.inc.php. Again, there are two counters, remove one if you only need one or add accordingly.
 
-The script calculatedaily.php must be set up to run as a cronjob once a day. It is recommended to run it shortly after midnight to have the daily aggregates available as soon as possible. The daily aggregates are used by some of the graphs in the GUI.
+The script calculatedaily.php must be set up to run as a cronjob once a day. It is recommended to run it shortly after midnight to have the daily aggregates available as soon as possible. The daily aggregates are used by some of the graphs in the GUI. In config.inc.php you can set not to use the table with daily aggregates if you don't want to or cannot set up the cronjob. Then the five-minute-data is used instead. This however results in slower performance for the graphs that would otherwise use the aggregate data.
 
 ### Things to check
 
 - In config.inc.php, each counter has a key. Make sure these keys are identical to the key in line 66 of s0.py. No data is stored if keys mismatch. For security reasons, you may want to set a key of your own.
 - The api_url in stroommeter.py points to a absolute url where api/index.php is located.
+- If you expect more than 9.9 kWh per five minutes or more than 99.9 kWh per day, then adjust the table structure accordingly.
 
 ### Debugging
 
