@@ -17,6 +17,7 @@
 */
 var selectedDate = dayjs();
 var selectedDate2 = dayjs().subtract(1, 'year');
+var counter = 1;
 
 $(function() {
     //init tabs
@@ -123,6 +124,11 @@ $('#date-6-e').change(function() {
     setDateFields();
     updateChart();
 });
+$('#counter-7').change(function() {
+    counter = $('#counter-7').val();
+    setDateFields();
+    updateChart();
+});
 
 //tab change handler
 $('#tabs').on('tabsactivate', function() {
@@ -197,7 +203,7 @@ function updateChart() {
     //get type
     var type = $('#tabs').tabs('option', 'active');
     //get chart data
-    $.getJSON('chart.php', { type: type, date: selectedDate.format('YYYY-MM-DD'), date2: selectedDate2.format('YYYY-MM-DD') })
+    $.getJSON('chart.php', { type: type, date: selectedDate.format('YYYY-MM-DD'), date2: selectedDate2.format('YYYY-MM-DD'), counter: counter })
     .done(function(data) {
         chart.updateSeries(data.series);
         chart.updateOptions(data.options);

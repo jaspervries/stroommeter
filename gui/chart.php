@@ -62,11 +62,31 @@ switch ($_GET['type']) {
 
 //build chart arrays
 $series = array();
-foreach($counters as $i => $counter) {
-    $series[$i] = array(
-        'name' => $counter['name'],
-        'data' => array()
-    );
+switch ($_GET['type']) {
+    case 7:
+        //TODO: find first year
+        $qry = "SELECT MIN(YEAR(`datetime`)) FROM `" . $db['prefix'] . "usage`";
+        if ($use_dailytable == TRUE) {
+            $qry = "SELECT MIN(YEAR(`date`)) FROM `" . $db['prefix'] . "daily`";
+        }
+        $res = mysqli_query($db['link'], $qry);
+        $year = mysqli_fetch_row($res);
+        $year = $year[0];
+        
+        for($i = $year; $i <= date('Y'); $i++) {
+            $series[$i - $year] = array(
+                'name' => (string) $i,
+                'data' => array()
+            );
+        }
+        break;
+    default:
+        foreach($counters as $i => $counter) {
+            $series[$i] = array(
+                'name' => $counter['name'],
+                'data' => array()
+            );
+        }
 }
 $options = array('xaxis' => array('categories' => array()));
 
@@ -85,6 +105,7 @@ switch ($_GET['type']) {
         $num_entries = round((strtotime($date . ' +1 month') - strtotime($date)) / 86400);
         break;
     case 3:
+    case 7:
         $num_entries = 12;
         break;
     case 6:
@@ -118,92 +139,132 @@ for ($h = 0; $h < $num_entries; $h++) {
         case 6:
             $k = 'totaal';
             break;
+        case 7:
+            $k = $h + 1;
+            break;
     }
     
     $data[$k] = null;
     $categories[] = $k;
 }
 
-$options['xaxis']['categories'] = $categories;
-$colors = array();
-foreach($counters as $i => $counter) {
-    $series[$i]['data'] = $data;
+//chart contents
+//types 0-6
+if ($_GET['type'] <= 6) {
+    $options['xaxis']['categories'] = $categories;
+    $colors = array();
+    foreach($counters as $i => $counter) {
+        $series[$i]['data'] = $data;
+        //set query
+        switch ($_GET['type']) {
+            case 0:
+                $qry = "SELECT HOUR(`datetime`), SUM(`usage`) FROM `" . $db['prefix'] . "usage` 
+                WHERE DATE(`datetime`) = '" . $date . "' AND `counter` = " . $i . " 
+                GROUP BY HOUR(`datetime`)";
+                break;
+            case 1:
+            case 2:
+                $qry = "SELECT DATE(`datetime`), SUM(`usage`) FROM `" . $db['prefix'] . "usage` 
+                WHERE DATE(`datetime`) BETWEEN '" . $date . "' AND DATE_ADD('" . $date . "', INTERVAL " . count($categories) . " DAY) AND `counter` = " . $i . " 
+                GROUP BY DATE(`datetime`)";
+                if (($use_dailytable == TRUE) && ($_GET['type'] == 2)) {
+                    $qry = "SELECT `date`, `usage` FROM `" . $db['prefix'] . "daily` 
+                    WHERE `date` BETWEEN '" . $date . "' AND DATE_ADD('" . $date . "', INTERVAL " . count($categories) . " DAY) AND `counter` = " . $i;
+                }
+                break;
+            case 3:
+                $qry = "SELECT YEAR(`datetime`), MONTH(`datetime`), SUM(`usage`) FROM `" . $db['prefix'] . "usage` 
+                WHERE DATE(`datetime`) BETWEEN '" . $date . "' AND DATE_ADD('" . $date . "', INTERVAL " . count($categories) . " MONTH) AND `counter` = " . $i . " 
+                GROUP BY YEAR(`datetime`), MONTH(`datetime`)";
+                if ($use_dailytable == TRUE) {
+                    $qry = "SELECT YEAR(`date`), MONTH(`date`), SUM(`usage`) FROM `" . $db['prefix'] . "daily` 
+                    WHERE DATE(`date`) BETWEEN '" . $date . "' AND DATE_ADD('" . $date . "', INTERVAL " . count($categories) . " MONTH) AND `counter` = " . $i . " 
+                    GROUP BY YEAR(`date`), MONTH(`date`)";
+                }
+                break;
+            case 4:
+                $qry = "SELECT HOUR(`datetime`), ROUND(AVG(`usage`)*12, 3) FROM `" . $db['prefix'] . "usage` 
+                WHERE DATE(`datetime`) BETWEEN '" . $date2 . "' AND '" . $date . "' AND `counter` = " . $i . " 
+                GROUP BY HOUR(`datetime`)";
+                break;
+            case 5:
+                $qry = "SELECT `t1`.`hour`, MAX(`t1`.`sum`) FROM (
+                    SELECT DATE(`datetime`) AS `date`, HOUR(`datetime`) AS `hour`, SUM(`usage`) AS `sum` FROM `" . $db['prefix'] . "usage`
+                        WHERE DATE(`datetime`) BETWEEN '" . $date2 . "' AND '" . $date . "' AND `counter` = " . $i . "
+                        GROUP BY DATE(`datetime`), HOUR(`datetime`)
+                    )  AS `t1`
+                GROUP BY `hour`";
+                break;
+            case 6:
+                $qry = "SELECT 'totaal', SUM(`usage`) FROM `" . $db['prefix'] . "usage`
+                WHERE DATE(`datetime`) BETWEEN '" . $date2 . "' AND '" . $date . "' AND `counter` = " . $i;
+                if ($use_dailytable == TRUE) {
+                    $qry = "SELECT 'totaal', SUM(`usage`) FROM `" . $db['prefix'] . "daily`
+                    WHERE `date` BETWEEN '" . $date2 . "' AND '" . $date . "' AND `counter` = " . $i;
+                }
+                break;
+        }
+        $res = mysqli_query($db['link'], $qry);
+        while ($row = mysqli_fetch_row($res)) {
+            switch ($_GET['type']) {
+                case 0:
+                case 1:
+                case 2:
+                case 4:
+                case 5:
+                case 6:
+                    $series[$i]['data'][($row[0])] = $row[1];
+                    break;
+                case 3:
+                    $series[$i]['data'][($row[0] . '-' . str_pad($row[1], 2, '0', STR_PAD_LEFT))] = $row[2];
+                    break;
+            }
+        }
+        //remove named keys from series
+        $series[$i]['data'] = array_values($series[$i]['data']);
+        //add to colours array
+        if (array_key_exists('color', $counter) && preg_match('/#[0-9A-F]{6}/i', $counter['color'])) {
+            $colors[] = $counter['color'];
+        }
+    }
+
+    //only add color array if there is a colour provided for each counter
+    if (count($counters) == count($colors)) {
+        $options['colors'] = $colors;
+    }
+}
+//type 7
+elseif ($_GET['type'] == 7) {
+    $options['xaxis']['categories'] = $categories;
     //set query
     switch ($_GET['type']) {
-        case 0:
-            $qry = "SELECT HOUR(`datetime`), SUM(`usage`) FROM `" . $db['prefix'] . "usage` 
-            WHERE DATE(`datetime`) = '" . $date . "' AND `counter` = " . $i . " 
-            GROUP BY HOUR(`datetime`)";
-            break;
-        case 1:
-        case 2:
-            $qry = "SELECT DATE(`datetime`), SUM(`usage`) FROM `" . $db['prefix'] . "usage` 
-            WHERE DATE(`datetime`) BETWEEN '" . $date . "' AND DATE_ADD('" . $date . "', INTERVAL " . count($categories) . " DAY) AND `counter` = " . $i . " 
-            GROUP BY DATE(`datetime`)";
-            if (($use_dailytable == TRUE) && ($_GET['type'] == 2)) {
-                $qry = "SELECT `date`, `usage` FROM `" . $db['prefix'] . "daily` 
-                WHERE `date` BETWEEN '" . $date . "' AND DATE_ADD('" . $date . "', INTERVAL " . count($categories) . " DAY) AND `counter` = " . $i;
-            }
-            break;
-        case 3:
-            $qry = "SELECT YEAR(`datetime`), MONTH(`datetime`), SUM(`usage`) FROM `" . $db['prefix'] . "usage` 
-            WHERE DATE(`datetime`) BETWEEN '" . $date . "' AND DATE_ADD('" . $date . "', INTERVAL " . count($categories) . " MONTH) AND `counter` = " . $i . " 
+        case 7:
+            $qry = "SELECT YEAR(`datetime`), MONTH(`datetime`), SUM(`usage`) FROM `" . $db['prefix'] . "usage`
+            WHERE `counter` = " . (is_numeric($_GET['counter']) ? $_GET['counter'] - 1 : 0) . " AND YEAR(`datetime`) >= " . $year . "
             GROUP BY YEAR(`datetime`), MONTH(`datetime`)";
             if ($use_dailytable == TRUE) {
-                $qry = "SELECT YEAR(`date`), MONTH(`date`), SUM(`usage`) FROM `" . $db['prefix'] . "daily` 
-                WHERE DATE(`date`) BETWEEN '" . $date . "' AND DATE_ADD('" . $date . "', INTERVAL " . count($categories) . " MONTH) AND `counter` = " . $i . " 
+                $qry = "SELECT YEAR(`date`), MONTH(`date`), SUM(`usage`) FROM `" . $db['prefix'] . "daily`
+                WHERE `counter` = " . (is_numeric($_GET['counter']) ? $_GET['counter'] - 1 : 0) . " AND YEAR(`date`) >= " . $year . "
                 GROUP BY YEAR(`date`), MONTH(`date`)";
-            }
-            break;
-        case 4:
-            $qry = "SELECT HOUR(`datetime`), ROUND(AVG(`usage`)*12, 3) FROM `" . $db['prefix'] . "usage` 
-            WHERE DATE(`datetime`) BETWEEN '" . $date2 . "' AND '" . $date . "' AND `counter` = " . $i . " 
-            GROUP BY HOUR(`datetime`)";
-            break;
-        case 5:
-            $qry = "SELECT `t1`.`hour`, MAX(`t1`.`sum`) FROM (
-                SELECT DATE(`datetime`) AS `date`, HOUR(`datetime`) AS `hour`, SUM(`usage`) AS `sum` FROM `" . $db['prefix'] . "usage`
-                    WHERE DATE(`datetime`) BETWEEN '" . $date2 . "' AND '" . $date . "' AND `counter` = " . $i . "
-                    GROUP BY DATE(`datetime`), HOUR(`datetime`)
-                )  AS `t1`
-            GROUP BY `hour`";
-            break;
-        case 6:
-            $qry = "SELECT 'totaal', SUM(`usage`) FROM `" . $db['prefix'] . "usage`
-            WHERE DATE(`datetime`) BETWEEN '" . $date2 . "' AND '" . $date . "' AND `counter` = " . $i;
-            if ($use_dailytable == TRUE) {
-                $qry = "SELECT 'totaal', SUM(`usage`) FROM `" . $db['prefix'] . "daily`
-                WHERE `date` BETWEEN '" . $date2 . "' AND '" . $date . "' AND `counter` = " . $i;
             }
             break;
     }
     $res = mysqli_query($db['link'], $qry);
     while ($row = mysqli_fetch_row($res)) {
         switch ($_GET['type']) {
-            case 0:
-            case 1:
-            case 2:
-            case 4:
-            case 5:
-            case 6:
-                $series[$i]['data'][($row[0])] = $row[1];
-                break;
-            case 3:
-                $series[$i]['data'][($row[0] . '-' . str_pad($row[1], 2, '0', STR_PAD_LEFT))] = $row[2];
+            case 7:
+                if (empty($series[$row[0] - $year]['data'])) {
+                    $series[$row[0] - $year]['data'] = $data;
+                }
+                $series[$row[0] - $year]['data'][$row[1]] = $row[2];
                 break;
         }
     }
     //remove named keys from series
-    $series[$i]['data'] = array_values($series[$i]['data']);
-    //add to colours array
-    if (array_key_exists('color', $counter) && preg_match('/#[0-9A-F]{6}/i', $counter['color'])) {
-        $colors[] = $counter['color'];
+    foreach ($series as $i => $serie) {
+        $series[$i]['data'] = array_values($series[$i]['data']);
     }
-}
-
-//only add color array if there is a colour provided for each counter
-if (count($counters) == count($colors)) {
-    $options['colors'] = $colors;
+    
 }
 
 $json = json_encode(array('series' => $series, 'options' => $options));

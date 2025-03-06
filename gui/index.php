@@ -17,6 +17,7 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 require('logincheck.inc.php');
+include('../config.inc.php')
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -36,13 +37,14 @@ require('logincheck.inc.php');
 <form>
 <div id="tabs">
     <ul>
-        <li><a href="#tabs-0">Grafiek per dag</a></li>
-        <li><a href="#tabs-1">Grafiek per week</a></li>
-        <li><a href="#tabs-2">Grafiek per maand</a></li>
-        <li><a href="#tabs-3">Grafiek per jaar</a></li>
-        <li><a href="#tabs-4">Gemiddelde per uur</a></li>
-        <li><a href="#tabs-5">Maximum per uur</a></li>
+        <li><a href="#tabs-0">Dag</a></li>
+        <li><a href="#tabs-1">Week</a></li>
+        <li><a href="#tabs-2">Maand</a></li>
+        <li><a href="#tabs-3">Jaar</a></li>
+        <li><a href="#tabs-4">Gem/uur</a></li>
+        <li><a href="#tabs-5">Max/uur</a></li>
         <li><a href="#tabs-6">Totaal</a></li>
+        <li><a href="#tabs-7">Vergelijk</a></li>
     </ul>
     <div id="tabs-0">
         <button id="day-previous">Vorige dag</button>
@@ -75,6 +77,15 @@ require('logincheck.inc.php');
     <div id="tabs-6">
         <label for="date-6-s">Startdatum: </label><input type="date" id="date-6-s">
         <label for="date-6-e">Einddatum: </label><input type="date" id="date-6-e">
+    </div>
+    <div id="tabs-7">
+        <label for="counter-7">Stroommeter: </label><select id="counter-7">
+        <?php
+        foreach ($counters as $counter) {
+            echo '<option value="' . $counter['counter'] . '">' . $counter['name'] . '</option>';
+        }
+        ?>
+        </select>
     </div>
 </div>
 </form>
