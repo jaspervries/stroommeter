@@ -28,7 +28,6 @@ $counters = array(
         'name' => 'Geleverd',
         'key' => 'MfbFdky9UtrwrYC2BCLZhK5Q',
         'counter' => 4,
-        'imp' => 1,
         'unit' => 'kWh',
         'color' => '#FF4560'
     ),
@@ -36,11 +35,30 @@ $counters = array(
         'name' => 'Teruggeleverd',
         'key' => 'MfbFdky9UtrwrYC2BCLZhK5Q',
         'counter' => 5,
-        'imp' => 1,
         'unit' => 'kWh',
         'color' => '#775DD0'
     )
 );
+
+/*$custom_charts = array(
+    array(
+        'name' => 'Zonnepanelen totaal',
+        'counters' => array(
+            1 => 'add',
+            6 => 'add'
+        )
+    ),
+    array(
+        'name' => 'Restverbruik (=zonnepanelen-teruglevering+levering-auto-warmtepomp)',
+        'counters' => array(
+            1 => 'add',
+            5 => 'subtract',
+            4 => 'add',
+            3 => 'subtract',
+            2 => 'subtract'
+        )
+    )
+);*/
 
 //use the table with daily aggregates for graphs (default), this is faster but requires a cronjob for calculatedaily.php
 $use_dailytable = TRUE;

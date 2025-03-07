@@ -64,6 +64,7 @@ switch ($_GET['type']) {
 $series = array();
 switch ($_GET['type']) {
     case 7:
+    case 8:
         //TODO: find first year
         $qry = "SELECT MIN(YEAR(`datetime`)) FROM `" . $db['prefix'] . "usage`";
         if ($use_dailytable == TRUE) {
@@ -106,6 +107,7 @@ switch ($_GET['type']) {
         break;
     case 3:
     case 7:
+    case 8:
         $num_entries = 12;
         break;
     case 6:
@@ -140,6 +142,7 @@ for ($h = 0; $h < $num_entries; $h++) {
             $k = 'totaal';
             break;
         case 7:
+        case 8:
             $k = $h + 1;
             break;
     }
@@ -233,8 +236,8 @@ if ($_GET['type'] <= 6) {
         $options['colors'] = $colors;
     }
 }
-//type 7
-elseif ($_GET['type'] == 7) {
+//type 7-8
+elseif ($_GET['type'] >= 7) {
     $options['xaxis']['categories'] = $categories;
     //set query
     switch ($_GET['type']) {
@@ -248,11 +251,84 @@ elseif ($_GET['type'] == 7) {
                 GROUP BY YEAR(`date`), MONTH(`date`)";
             }
             break;
+        case 8:
+            /*Example:
+            SELECT `t_base`.`year`, `t_base`.`month`, `t_1`.`counter1`, `t_2`.`counter2` FROM
+                (SELECT YEAR(`date`) AS `year`, MONTH(`date`) AS `month` FROM `eng_daily`
+                WHERE YEAR(`date`) >= 2022
+                GROUP BY YEAR(`date`), MONTH(`date`)) AS `t_base`
+            LEFT JOIN 
+                (SELECT YEAR(`date`) AS `year`, MONTH(`date`) AS `month`, SUM(`usage`) AS `counter1` FROM `eng_daily`
+                WHERE `counter` = 1 AND YEAR(`date`) >= 2022
+                GROUP BY YEAR(`date`), MONTH(`date`)) AS `t_1`
+            ON (`t_base`.`year` = `t_1`.`year` AND `t_base`.`month` = `t_1`.`month`)
+            LEFT JOIN 
+                (SELECT YEAR(`date`) AS `year`, MONTH(`date`) AS `month`, SUM(`usage`) AS `counter2` FROM `eng_daily`
+                WHERE `counter` = 2 AND YEAR(`date`) >= 2022
+                GROUP BY YEAR(`date`), MONTH(`date`)) AS `t_2`
+            ON (`t_base`.`year` = `t_2`.`year` AND `t_base`.`month` = `t_2`.`month`)
+            */
+            $qry = "SELECT `t_base`.`year`, `t_base`.`month`, ";
+            foreach ($custom_charts[(is_numeric($_GET['counter']) ? $_GET['counter'] : 1)]['counters'] as $counter => $operation) {
+                $counter--;
+                switch($operation) {
+                    case 'subtract':
+                    case '-';
+                        $operation = '-';
+                        break;
+                    default:
+                        $operation = '+';
+                }
+                $qry .= $operation . " COALESCE(`t_" . $counter . "`.`counter" . $counter . "`, 0) ";
+            }
+            $qry .= " FROM
+                (SELECT YEAR(`datetime`) AS `year`, MONTH(`datetime`) AS `month` FROM `" . $db['prefix'] . "usage`
+                WHERE YEAR(`datetime`) >= " . $year . "
+                GROUP BY YEAR(`datetime`), MONTH(`datetime`)) AS `t_base`";
+            //for each counters
+            foreach ($custom_charts[(is_numeric($_GET['counter']) ? $_GET['counter'] : 1)]['counters'] as $counter => $operation) {
+                $counter--;
+                $qry .= "LEFT JOIN 
+                    (SELECT YEAR(`datetime`) AS `year`, MONTH(`datetime`) AS `month`, SUM(`usage`) AS `counter" . $counter . "` FROM `" . $db['prefix'] . "usage`
+                    WHERE `counter` = " . $counter . " AND YEAR(`datetime`) >= " . $year . "
+                    GROUP BY YEAR(`datetime`), MONTH(`datetime`)) AS `t_" . $counter . "`
+                ON (`t_base`.`year` = `t_" . $counter . "`.`year` AND `t_base`.`month` = `t_" . $counter . "`.`month`)";
+            }
+            if ($use_dailytable == TRUE) {
+                $qry = "SELECT `t_base`.`year`, `t_base`.`month`, ";
+                foreach ($custom_charts[(is_numeric($_GET['counter']) ? $_GET['counter'] : 1)]['counters'] as $counter => $operation) {
+                    $counter--;
+                    switch($operation) {
+                        case 'subtract':
+                        case '-';
+                            $operation = '-';
+                            break;
+                        default:
+                            $operation = '+';
+                    }
+                    $qry .= $operation . " COALESCE(`t_" . $counter . "`.`counter" . $counter . "`, 0) ";
+                }
+                $qry .= " FROM
+                    (SELECT YEAR(`date`) AS `year`, MONTH(`date`) AS `month` FROM `" . $db['prefix'] . "daily`
+                    WHERE YEAR(`date`) >= " . $year . "
+                    GROUP BY YEAR(`date`), MONTH(`date`)) AS `t_base`";
+                //for each counters
+                foreach ($custom_charts[(is_numeric($_GET['counter']) ? $_GET['counter'] : 1)]['counters'] as $counter => $operation) {
+                    $counter--;
+                    $qry .= "LEFT JOIN 
+                        (SELECT YEAR(`date`) AS `year`, MONTH(`date`) AS `month`, SUM(`usage`) AS `counter" . $counter . "` FROM `" . $db['prefix'] . "daily`
+                        WHERE `counter` = " . $counter . " AND YEAR(`date`) >= " . $year . "
+                        GROUP BY YEAR(`date`), MONTH(`date`)) AS `t_" . $counter . "`
+                    ON (`t_base`.`year` = `t_" . $counter . "`.`year` AND `t_base`.`month` = `t_" . $counter . "`.`month`)";
+                }
+            }
+            break;
     }
     $res = mysqli_query($db['link'], $qry);
     while ($row = mysqli_fetch_row($res)) {
         switch ($_GET['type']) {
             case 7:
+            case 8:
                 if (empty($series[$row[0] - $year]['data'])) {
                     $series[$row[0] - $year]['data'] = $data;
                 }
@@ -264,7 +340,6 @@ elseif ($_GET['type'] == 7) {
     foreach ($series as $i => $serie) {
         $series[$i]['data'] = array_values($series[$i]['data']);
     }
-    
 }
 
 $json = json_encode(array('series' => $series, 'options' => $options));

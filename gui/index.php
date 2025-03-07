@@ -45,6 +45,13 @@ include('../config.inc.php')
         <li><a href="#tabs-5">Max/uur</a></li>
         <li><a href="#tabs-6">Totaal</a></li>
         <li><a href="#tabs-7">Vergelijk</a></li>
+        <?php
+        if (!empty($custom_charts)) {
+            ?>
+            <li><a href="#tabs-8">Aangepast</a></li>
+            <?php
+        }
+        ?>
     </ul>
     <div id="tabs-0">
         <button id="day-previous">Vorige dag</button>
@@ -87,6 +94,21 @@ include('../config.inc.php')
         ?>
         </select>
     </div>
+    <?php
+    if (!empty($custom_charts)) {
+        ?>
+        <div id="tabs-8">
+            <label for="custom-8">Grafiek: </label><select id="custom-8">
+            <?php
+            foreach ($custom_charts as $i => $custom_chart) {
+                echo '<option value="' . $i . '">' . $custom_chart['name'] . '</option>';
+            }
+            ?>
+            </select>
+        </div>
+        <?php
+    }
+    ?>
 </div>
 </form>
 

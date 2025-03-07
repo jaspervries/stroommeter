@@ -8,7 +8,7 @@ Stroommeter is a toolchain for Raspberry Pi that allows to read s0 (pulse meter)
 Any Raspberry Pi with networking capabilities should suffice. It is tested on a Pi 3.
 
 ### s0 meter
-Connect a GPIO pin of your choice to the + side of the s0 connector (the default used are GPIO23 for counter1 and GPIO24 for counter2), but you can change this). Connect the - of the s0 connector to a ground pin on the GPIO header. You can connect any number of meters for as long as you have free digital input pins on the Pi. Ground connections can be shared if you don't have enough pins.
+Connect a GPIO pin of your choice to the + side of the s0 connector (the default used are GPIO23 for counter1 and GPIO24 for counter2, but you can change this). Connect the - of the s0 connector to a ground pin on the GPIO header. You can connect any number of meters for as long as you have free digital input pins on the Pi. Ground connections can be shared if you don't have enough pins.
 The script supports two meters by default, this can easily be extended.
 Note: Raspberry Pi uses 3.3V logic levels. In some cases this may be insufficient for the energy meter's s0 port to function properly. In that case either use a different energy meter or add a level shifter in the circuit. On three different meters I didn't have any problems using 3.3V.
 
@@ -108,17 +108,24 @@ The gui folder provides a web interface to view the stored data in graphs. The f
 - montly per day
 - yearly per month
 - average per hour
-- maximum per day
+- maximum per hour
 - total per year
+- comparison of monthly totals over multiple years
+- custom (see below)
+
 Access to the gui is protected by username and password in config.inc.php. You can have multiple user accounts. You may want to change/remove the default user. You can encode a password using encodepassword.php.
 
+### Custom charts
 
-# Troubleshooting
+There is an option for custom charts, which can be configured in config.inc.php. The chart type is identical to the comparison type (monthly totals over multiple years). Where the comparison type chart shows one counter at a time, the custom type allows to add/subtract multiple counters.
+
+
+## Troubleshooting
 
 https://superuser.com/questions/1602999/ubuntu-systemctl-service-fails-with-main-process-exited-code-exited-status-1
 
 
-# License
+## License
 
 stroommeter - toolchain for reading energy meters
 Copyright (C) 2022-2025  Jasper Vries
