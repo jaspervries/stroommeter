@@ -88,7 +88,7 @@ $qry[] = "CREATE TABLE `".$db['prefix']."hourly` (
 	`date` DATE NOT NULL,
 	`hour` TINYINT UNSIGNED NOT NULL,
 	`counter` INT UNSIGNED NOT NULL,
-	`usage` FLOAT UNSIGNED NOT NULL DEFAULT 0,
+	`usage` DECIMAL(6,4) NOT NULL DEFAULT 0,
 	PRIMARY KEY (`date`, `hour`, `counter`)
 	)
 	ENGINE=MyISAM";

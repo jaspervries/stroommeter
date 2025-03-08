@@ -186,9 +186,14 @@ if ($_GET['type'] <= 6) {
                 }
                 break;
             case 4:
-                $qry = "SELECT HOUR(`datetime`), ROUND(AVG(`usage`)*12, 3) FROM `" . $db['prefix'] . "usage` 
+                $qry = "SELECT HOUR(`datetime`), ROUND(AVG(`usage`*12), 3) FROM `" . $db['prefix'] . "usage` 
                 WHERE DATE(`datetime`) BETWEEN '" . $date2 . "' AND '" . $date . "' AND `counter` = " . $i . " 
                 GROUP BY HOUR(`datetime`)";
+                if ($use_hourlytable == TRUE) {
+                    $qry = "SELECT `hour`, ROUND(AVG(`usage`), 3) FROM `" . $db['prefix'] . "hourly` 
+                    WHERE `date` BETWEEN '" . $date2 . "' AND '" . $date . "' AND `counter` = " . $i . " 
+                    GROUP BY `hour`";
+                }
                 break;
             case 5:
                 $qry = "SELECT `t1`.`hour`, MAX(`t1`.`sum`) FROM (
@@ -197,6 +202,11 @@ if ($_GET['type'] <= 6) {
                         GROUP BY DATE(`datetime`), HOUR(`datetime`)
                     )  AS `t1`
                 GROUP BY `hour`";
+                if ($use_hourlytable == TRUE) {
+                    $qry = "SELECT `hour`, MAX(`usage`) FROM `" . $db['prefix'] . "hourly` 
+                    WHERE `date` BETWEEN '" . $date2 . "' AND '" . $date . "' AND `counter` = " . $i . " 
+                    GROUP BY `hour`";
+                }
                 break;
             case 6:
                 $qry = "SELECT 'totaal', SUM(`usage`) FROM `" . $db['prefix'] . "usage`

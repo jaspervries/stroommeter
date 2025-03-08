@@ -85,7 +85,7 @@ Configure your database credentials in dbconnect.inc.php. The database tables ca
 
 The counters must be configured in config.inc.php. Again, there are two counters, remove one if you only need one or add accordingly.
 
-The script calculatedaily.php must be set up to run as a cronjob once a day. It is recommended to run it shortly after midnight to have the daily aggregates available as soon as possible. The daily aggregates are used by some of the graphs in the GUI. In config.inc.php you can set not to use the table with daily aggregates if you don't want to or cannot set up the cronjob. Then the five-minute-data is used instead. This however results in slower performance for the graphs that would otherwise use the aggregate data.
+The script calculateaggregates.php can be set up to run as a cronjob once a day. It is recommended to run it shortly after midnight to have the daily aggregates available as soon as possible. The aggregates are used by most of the charts in the GUI to improve performance. In config.inc.php you can set not to use the table with daily and/or hourly aggregates if you don't want to or cannot set up the cronjob. Then the five-minute-data is used instead. This however results longer loading times for the charts.
 
 ### Things to check
 
@@ -102,7 +102,7 @@ Make sure to remove the test folder from a production environment.
 
 ## GUI
 
-The gui folder provides a web interface to view the stored data in graphs. The following graphs are available:
+The gui folder provides a web interface to view charts of the stored data. The following charts are available:
 - daily per hour
 - weekly per day
 - montly per day
