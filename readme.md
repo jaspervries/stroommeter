@@ -85,17 +85,17 @@ Configure your database credentials in dbconnect.inc.php. The database tables ca
 
 The counters must be configured in config.inc.php. Again, there are two counters, remove one if you only need one or add accordingly.
 
-The script calculateaggregates.php can be set up to run as a cronjob once a day. It is recommended to run it shortly after midnight to have the daily aggregates available as soon as possible. The aggregates are used by most of the charts in the GUI to improve performance. In config.inc.php you can set not to use the table with daily and/or hourly aggregates if you don't want to or cannot set up the cronjob. Then the five-minute-data is used instead. This however results longer loading times for the charts.
+The script calculateaggregates.php can be set up to run as a cronjob once a day. It is recommended to run it shortly after midnight to have the daily aggregates available as soon as possible. The aggregates are used by most of the charts in the GUI to improve performance. In config.inc.php you can set not to use the table with daily and/or hourly aggregates if you don't want to or cannot set up the cronjob. In that case also disable using the temp table. Then the five-minute-data is used instead. This however results longer loading times for the charts.
 
 ### Things to check
 
-- In config.inc.php, each counter has a key. Make sure these keys are identical to the key in line 66 of s0.py. No data is stored if keys mismatch. For security reasons, you may want to set a key of your own.
-- The api_url in stroommeter.py points to a absolute url where api/index.php is located.
+- In config.inc.php, each counter has a key. Make sure these keys are identical to the key in line 83 of s0meter.py and line 108 of p1meter.py. No data is stored if keys mismatch. For security reasons, you may want to set a key of your own.
+- The api_url in s0meter.py and p1meter.py points to a absolute url where api/index.php is located.
 - If you expect more than 9.9 kWh per five minutes or more than 99.9 kWh per day, then adjust the table structure accordingly.
 
 ### Debugging
 
-The script test/index.php can be used to test if data is sent correctly from stroommeter.py. Point api_url to to the location of this file and every time data is received it will be stored in files in the same directory. No database is needed for this test script.
+The script test/index.php can be used to test if data is sent correctly from s0meter.py and p1meter.py. Point api_url to to the location of this file and every time data is received it will be stored in files in the same directory. No database is needed for this test script.
 The script test/testpost.php can be used to test the api script. Edit it to make sure the url post to the api/index.php script and that the key used is correct. You can then invoke test/testpost.php from the commandline or by entering the url to it in a webbrowser.
 Make sure to remove the test folder from a production environment.
 

@@ -55,6 +55,14 @@ foreach ($counters as $i => $counter) {
         `counter` = " . $i . ",
         `usage` = '" . $json['counter' . $counter['counter']] . "'";
         mysqli_query($db['link'], $qry);
+        //also insert in temporary table 
+        if ($use_temptable == TRUE) {
+            $qry = "INSERT INTO `" . $db['prefix'] . "temp` SET
+            `datetime` = '" . $json['time'] . "',
+            `counter` = " . $i . ",
+            `usage` = '" . $json['counter' . $counter['counter']] . "'";
+            mysqli_query($db['link'], $qry);
+        }
     }
 }
 //report final status code

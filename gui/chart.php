@@ -164,12 +164,25 @@ if ($_GET['type'] <= 6) {
                 $qry = "SELECT HOUR(`datetime`), SUM(`usage`) FROM `" . $db['prefix'] . "usage` 
                 WHERE DATE(`datetime`) = '" . $date . "' AND `counter` = " . $i . " 
                 GROUP BY HOUR(`datetime`)";
+                //use temptable
+                if (($use_temptable == TRUE) && strtotime($date) >= strtotime('-' . $temptable_window . ' day')) {
+                    $qry = "SELECT HOUR(`datetime`), SUM(`usage`) FROM `" . $db['prefix'] . "temp` 
+                    WHERE DATE(`datetime`) = '" . $date . "' AND `counter` = " . $i . " 
+                    GROUP BY HOUR(`datetime`)";
+                }
                 break;
             case 1:
             case 2:
                 $qry = "SELECT DATE(`datetime`), SUM(`usage`) FROM `" . $db['prefix'] . "usage` 
                 WHERE DATE(`datetime`) BETWEEN '" . $date . "' AND DATE_ADD('" . $date . "', INTERVAL " . count($categories) . " DAY) AND `counter` = " . $i . " 
                 GROUP BY DATE(`datetime`)";
+                //use temptable for week view only
+                if (($use_temptable == TRUE) && ($_GET['type'] == 1) && strtotime($date) >= strtotime('-' . $temptable_window . ' day')) {
+                    $qry = "SELECT DATE(`datetime`), SUM(`usage`) FROM `" . $db['prefix'] . "temp` 
+                    WHERE DATE(`datetime`) BETWEEN '" . $date . "' AND DATE_ADD('" . $date . "', INTERVAL " . count($categories) . " DAY) AND `counter` = " . $i . " 
+                    GROUP BY DATE(`datetime`)";
+                }
+                //use dailytable for month view only
                 if (($use_dailytable == TRUE) && ($_GET['type'] == 2)) {
                     $qry = "SELECT `date`, `usage` FROM `" . $db['prefix'] . "daily` 
                     WHERE `date` BETWEEN '" . $date . "' AND DATE_ADD('" . $date . "', INTERVAL " . count($categories) . " DAY) AND `counter` = " . $i;

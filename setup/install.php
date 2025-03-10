@@ -84,6 +84,14 @@ $qry[] = "CREATE TABLE `".$db['prefix']."usage` (
 	)
 	ENGINE=MyISAM";
 
+$qry[] = "CREATE TABLE `".$db['prefix']."temp` (
+	`datetime` DATETIME NOT NULL DEFAULT NOW(),
+	`counter` INT UNSIGNED NOT NULL,
+	`usage` DECIMAL(5,4) NOT NULL DEFAULT 0,
+	PRIMARY KEY (`datetime`, `counter`)
+	)
+	ENGINE=MyISAM";
+
 $qry[] = "CREATE TABLE `".$db['prefix']."hourly` (
 	`date` DATE NOT NULL,
 	`hour` TINYINT UNSIGNED NOT NULL,

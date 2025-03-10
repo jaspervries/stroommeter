@@ -82,4 +82,11 @@ if ($use_hourlytable == TRUE) {
     }
 }
 
+//cleanup temp table
+//(probably better to rename the script to cronjob.php or something, as cleaning up the temp table is not calculating aggregates)
+if ($use_temptable == TRUE) {
+    $qry = "DELETE FROM `" . $db['prefix'] . "temp`
+    WHERE DATE(`datetime`) < DATE_ADD(CURDATE(), INTERVAL -" . ((is_numeric($temptable_window) && ($temptable_window > 0)) ? $temptable_window : 31) . " DAY)";
+    mysqli_query($db['link'], $qry);
+}
 ?>
