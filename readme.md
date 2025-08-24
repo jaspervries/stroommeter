@@ -87,6 +87,12 @@ The counters must be configured in config.inc.php. Again, there are two counters
 
 The script calculateaggregates.php can be set up to run as a cronjob once a day. It is recommended to run it shortly after midnight to have the daily aggregates available as soon as possible. The aggregates are used by most of the charts in the GUI to improve performance. In config.inc.php you can set not to use the table with daily and/or hourly aggregates if you don't want to or cannot set up the cronjob. In that case also disable using the temp table. Then the five-minute-data is used instead. This however results longer loading times for the charts.
 
+### Watchdog
+
+The watchdog script is optional. If you want to monitor if the Raspberry Pi hasn't stopped pushing data, you can set up the watchdog script as a cronjob. You're free how often this cronjob should run from every five minutes to once a day. Every hour is problably good enough.
+If the watchdog script finds less data points than expected, it sends an e-mail using PHPMailer. Only sending e-mails through SMTP is supported and is configured in config.inc.php.
+If you want to test the watchdog script, find the value 287 in line 46 and change it temporarily to 288. It will then also send an e-mail if the correct amount of datapoints are found.
+
 ### Things to check
 
 - In config.inc.php, each counter has a key. Make sure these keys are identical to the key in line 83 of s0meter.py and line 108 of p1meter.py. No data is stored if keys mismatch. For security reasons, you may want to set a key of your own.

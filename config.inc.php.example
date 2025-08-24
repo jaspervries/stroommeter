@@ -70,4 +70,17 @@ $users = array(
     'defaultuser' => '$2y$10$a39r2zntqz0aoigzD8ccVu/6mayTA5p.CD6sG/ATJZnRrsgYB8lQm'
 );
 
+//mail settings
+//no need to set this if you don't use the watchdog script
+$cfg['mail']['server'] = 'smtp.example.com';      //Set the SMTP server to send through
+$cfg['mail']['smtpauth']  = true;                 //Enable SMTP authentication
+$cfg['mail']['smtpuser']  = 'user@example.com';   //SMTP username
+$cfg['mail']['smtppass']  = 'secret';             //SMTP password
+$cfg['mail']['smtpsecure'] = 'ENCRYPTION_SMTPS';  //ENCRYPTION_SMTPS, ENCRYPTION_STARTTLS or empty string
+$cfg['mail']['smtpport'] = 465;                   //TCP port to connect to; use 587 if you have set `SMTPSecure = ENCRYPTION_STAR
+$cfg['mail']['from'] = 'from@example.com';        //address to use as sender
+$cfg['mail']['from_name'] = 'stroommeter';        //name to use as sender
+$cfg['mail']['subject'] = 'stroommeter status';   //mail subject
+$cfg['mail']['to'] = 'joe@example.net';           //address to send to
+
 ?>
